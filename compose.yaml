@@ -1,14 +1,6 @@
 version: "3"
 include:
   - proxy.yaml
-
-networks:
-  backend:
-    ipam:
-      driver: bridge
-      config:
-        - subnet: 172.20.0.0/16
-
 services:
 
   db:
@@ -36,4 +28,4 @@ services:
       backend:
         ipv4_address: 172.20.0.5
     ports:
-      - "5000:8090"
+      - "5000:8080"
