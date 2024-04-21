@@ -1,0 +1,39 @@
+version: "3"
+include:
+  - proxy.yaml
+
+networks:
+  backend:
+    ipam:
+      driver: bridge
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+
+  db:
+    image: mysql:8
+    restart: on-failure
+    env_file:
+      - ./.env
+    networks:
+      backend:
+        ipv4_address: 172.20.0.10
+    ports:
+      - "3306:3306"
+
+  web:
+    image: cr.yandex/crpglc1v43de5cb3olti/shvirtd-example-python:1.0.0
+    restart: on-failure
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      backend:
+        ipv4_address: 172.20.0.5
+    ports:
+      - "5000:8090"
