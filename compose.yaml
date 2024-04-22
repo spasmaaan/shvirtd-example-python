@@ -20,12 +20,37 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=172.20.0.10
-      - DB_NAME=${MYSQL_DATABASE}
-      - DB_USER=${MYSQL_USER}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST: db
+      - DB_USER: ${MYSQL_USER}
+      - DB_PASSWORD: ${MYSQL_PASSWORD}
+      - DB_NAME: ${MYSQL_DATABASE}
     networks:
       backend:
         ipv4_address: 172.20.0.5
     ports:
       - "5000:8080"
+  
+  db-backup:
+    image: schnitzler/mysqldump
+    restart: always
+    depends_on:
+      - db
+    volumes_from:
+      - backup
+    command: ["1", "*", "*", "*", "*"]
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./backup_db.sh:/usr/local/bin/backup
+      - /opt/backup:/opt/backup
+    networks:
+      backend:
+        ipv4_address: 172.20.0.11
+
+  backup:
+    image: busybox
+    volumes:
+      - ./backup:/backup
